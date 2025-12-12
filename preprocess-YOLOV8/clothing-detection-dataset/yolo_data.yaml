@@ -1,0 +1,12 @@
+
+train: C:/Users/USER/OneDrive/Documents/AOL-Compvis/clothing-detection-dataset/split_dataset/train/images
+val: C:/Users/USER/OneDrive/Documents/AOL-Compvis/clothing-detection-dataset/split_dataset/val/images
+nc: 7
+names:
+  0: crop_top
+  1: sleeveless_top
+  2: transparent_top
+  3: ripped_jeans
+  4: short_medium_skirt
+  5: shorts
+  6: opened_foot
