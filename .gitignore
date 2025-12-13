@@ -24,3 +24,9 @@ dist-ssr
 *.sw?
 
 .vercel
+
+# Data and preprocessing files
+data
+preprocess-YOLOV8
+
+.env*.local

@@ -1,0 +1,6 @@
+fastapi
+websockets
+opencv-python-headless
+numpy
+ultralytics
+vercel-blob

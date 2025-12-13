@@ -7,12 +7,14 @@ const SNAPSHOT_PLACEHOLDER = 'https://picsum.photos/320/240';
 export const LiveMonitor: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const ws = useRef<WebSocket | null>(null);
   const [isStreamActive, setIsStreamActive] = useState(false);
   const [detections, setDetections] = useState<Detection[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Start Camera
+  // Start Camera & WebSocket
   const startCamera = async () => {
+    setIsLoading(true);
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
             video: { width: 1280, height: 720 }, 
@@ -20,12 +22,36 @@ export const LiveMonitor: React.FC = () => {
         });
         if (videoRef.current) {
             videoRef.current.srcObject = stream;
-            videoRef.current.play();
-            setIsStreamActive(true);
+            videoRef.current.onloadedmetadata = () => {
+                videoRef.current?.play();
+                setIsStreamActive(true);
+                setIsLoading(false);
+            };
         }
+
+        // Initialize WebSocket connection
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        ws.current = new WebSocket(`${wsProtocol}//${window.location.host}/api/ws`);
+
+        ws.current.onopen = () => {
+            console.log("WebSocket connection established");
+        };
+
+        ws.current.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.detections) {
+                setDetections(data.detections);
+            }
+        };
+
+        ws.current.onclose = () => {
+            console.log("WebSocket connection closed");
+        };
+
     } catch (err) {
         console.error("Error accessing camera:", err);
         alert("Could not access camera. Please check permissions.");
+        setIsLoading(false);
     }
   };
 
@@ -36,40 +62,35 @@ export const LiveMonitor: React.FC = () => {
           videoRef.current.srcObject = null;
           setIsStreamActive(false);
       }
+      if (ws.current) {
+          ws.current.close();
+      }
   };
 
-  // Simulate Object Detection (since we don't have the Python backend running in this environment)
-  // In a real app, this would be a WebSocket onmessage handler receiving bounding boxes.
+  // Send video frames to backend
   useEffect(() => {
     let interval: number;
 
-    if (isStreamActive) {
-        interval = window.setInterval(() => {
-            // Randomly generate detections for demo purposes
-            const shouldDetect = Math.random() > 0.6;
-            if (shouldDetect) {
-                const types = [ViolationType.SHORTS, ViolationType.SANDALS, ViolationType.SLEEVELESS];
-                const randomType = types[Math.floor(Math.random() * types.length)];
-                
-                const newDetection: Detection = {
-                    id: Date.now().toString(),
-                    timestamp: Date.now(),
-                    type: randomType,
-                    confidence: 0.85 + (Math.random() * 0.1),
-                    boundingBox: {
-                        x: 200 + Math.random() * 400,
-                        y: 100 + Math.random() * 300,
-                        width: 150,
-                        height: 300
-                    }
-                };
-                setDetections([newDetection]);
-            } else {
-                setDetections([]);
-            }
-        }, 1000);
-    } else {
-        setDetections([]);
+    if (isStreamActive && ws.current) {
+        const video = videoRef.current;
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        if (video && ctx) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            interval = window.setInterval(() => {
+                if (ws.current?.readyState === WebSocket.OPEN) {
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            ws.current?.send(blob);
+                        }
+                    }, 'image/jpeg', 0.8);
+                }
+            }, 100);
+        }
     }
 
     return () => clearInterval(interval);
@@ -93,22 +114,36 @@ export const LiveMonitor: React.FC = () => {
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      // Define colors for different violation types
+      const violationColors: Record<ViolationType, string> = {
+          [ViolationType.SHORTS]: '#facc15', // Yellow
+          [ViolationType.SANDALS]: '#f97316', // Orange
+          [ViolationType.SLEEVELESS]: '#ef4444', // Red
+          // Add more as needed
+      };
+
       detections.forEach(det => {
           const { x, y, width, height } = det.boundingBox;
-          
+          const color = violationColors[det.type] || '#a855f7'; // Default to purple
+
           // Draw Box
-          ctx.strokeStyle = '#ef4444'; // Red
+          ctx.strokeStyle = color;
           ctx.lineWidth = 4;
           ctx.strokeRect(x, y, width, height);
 
           // Draw Label Background
-          ctx.fillStyle = '#ef4444';
-          ctx.fillRect(x, y - 30, width, 30);
+          const label = `${det.type} (${(det.confidence * 100).toFixed(0)}%)`;
+          ctx.font = 'bold 16px Inter';
+          const textMetrics = ctx.measureText(label);
+          const textWidth = textMetrics.width;
+          const textHeight = 20; // Approximate height for 16px font
+
+          ctx.fillStyle = color;
+          ctx.fillRect(x, y - textHeight - 10, textWidth + 20, textHeight + 10); // Padding for text
 
           // Draw Text
           ctx.fillStyle = 'white';
-          ctx.font = 'bold 16px Inter';
-          ctx.fillText(`${det.type} (${(det.confidence * 100).toFixed(0)}%)`, x + 10, y - 10);
+          ctx.fillText(label, x + 10, y - 10);
       });
   }, [detections]);
 
@@ -152,7 +187,13 @@ export const LiveMonitor: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Video Feed */}
         <div className="lg:col-span-2 relative bg-black rounded-xl overflow-hidden shadow-lg aspect-video flex items-center justify-center">
-            {!isStreamActive && (
+            {isLoading && (
+                <div className="text-white flex flex-col items-center">
+                    <i className="fas fa-spinner fa-spin text-4xl mb-2"></i>
+                    <span>Starting camera...</span>
+                </div>
+            )}
+            {!isStreamActive && !isLoading && (
                 <div className="text-slate-500 flex flex-col items-center">
                     <i className="fas fa-video-slash text-4xl mb-2"></i>
                     <span>Camera Offline</span>

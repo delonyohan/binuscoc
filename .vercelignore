@@ -1,2 +1,14 @@
-data/images
+# Vercel ignore
+node_modules
+.git
+.gitignore
+.dockerignore
+Dockerfile.frontend
+Dockerfile.backend
+docker-compose.yml
+docker-compose.dev.yml
+README.md
+
+# Exclude large data and model directories
+data
 preprocess-YOLOV8
