@@ -4,6 +4,8 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 annotated-doc==0.0.4
     # via fastapi
 annotated-types==0.7.0
@@ -107,13 +109,16 @@ starlette==0.50.0
     # via fastapi
 sympy==1.14.0
     # via torch
-torch==2.9.1
+torch==2.9.1+cpu
     # via
+    #   -r requirements.in
     #   torchvision
     #   ultralytics
     #   ultralytics-thop
-torchvision==0.24.1
-    # via ultralytics
+torchvision==0.24.1+cpu
+    # via
+    #   -r requirements.in
+    #   ultralytics
 tqdm==4.67.1
     # via vercel-blob
 typing-extensions==4.15.0
