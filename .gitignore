@@ -30,3 +30,6 @@ data
 preprocess-YOLOV8
 
 .env*.local
+
+# Model files
+*.pt
