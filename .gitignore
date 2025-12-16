@@ -82,3 +82,4 @@ MANIFEST
 /data/
 /preprocess-YOLOV8/
 *.pt
+.env*.local
