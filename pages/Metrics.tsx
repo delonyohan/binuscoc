@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import Papa from 'papaparse';
 
 const fetchCsv = async () => {
-  const response = await fetch('/data/metrics/results.csv');
+  const response = await fetch('/metrics/results.csv');
   const reader = response.body.getReader();
   const result = await reader.read();
   const decoder = new TextDecoder('utf-8');
@@ -29,7 +29,7 @@ const Metrics: React.FC = () => {
             <CardTitle>Confusion Matrix</CardTitle>
           </CardHeader>
           <CardContent>
-            <img src="/data/metrics/confusion_matrix.png" alt="Confusion Matrix" />
+            <img src="/metrics/confusion_matrix.png" alt="Confusion Matrix" />
           </CardContent>
         </Card>
         <Card>
@@ -37,7 +37,7 @@ const Metrics: React.FC = () => {
             <CardTitle>Normalized Confusion Matrix</CardTitle>
           </CardHeader>
           <CardContent>
-            <img src="/data/metrics/confusion_matrix_normalized.png" alt="Normalized Confusion Matrix" />
+            <img src="/metrics/confusion_matrix_normalized.png" alt="Normalized Confusion Matrix" />
           </CardContent>
         </Card>
         <Card>
@@ -45,7 +45,7 @@ const Metrics: React.FC = () => {
             <CardTitle>Results</CardTitle>
           </CardHeader>
           <CardContent>
-            <img src="/data/metrics/results.png" alt="Results" />
+            <img src="/metrics/results.png" alt="Results" />
           </CardContent>
         </Card>
         <Card>
@@ -53,7 +53,7 @@ const Metrics: React.FC = () => {
             <CardTitle>F1 Curve</CardTitle>
           </CardHeader>
           <CardContent>
-            <img src="/data/metrics/BoxF1_curve.png" alt="F1 Curve" />
+            <img src="/metrics/BoxF1_curve.png" alt="F1 Curve" />
           </CardContent>
         </Card>
         <Card>
@@ -61,7 +61,7 @@ const Metrics: React.FC = () => {
             <CardTitle>Precision Curve</CardTitle>
           </CardHeader>
           <CardContent>
-            <img src="/data/metrics/BoxP_curve.png" alt="Precision Curve" />
+            <img src="/metrics/BoxP_curve.png" alt="Precision Curve" />
           </CardContent>
         </Card>
         <Card>
@@ -69,7 +69,7 @@ const Metrics: React.FC = () => {
             <CardTitle>Precision-Recall Curve</CardTitle>
           </CardHeader>
           <CardContent>
-            <img src="/data/metrics/BoxPR_curve.png" alt="PR Curve" />
+            <img src="/metrics/BoxPR_curve.png" alt="PR Curve" />
           </CardContent>
         </Card>
         <Card>
@@ -77,7 +77,7 @@ const Metrics: React.FC = () => {
             <CardTitle>Recall Curve</CardTitle>
           </CardHeader>
           <CardContent>
-            <img src="/data/metrics/BoxR_curve.png" alt="Recall Curve" />
+            <img src="/metrics/BoxR_curve.png" alt="Recall Curve" />
           </CardContent>
         </Card>
       </div>

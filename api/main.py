@@ -10,7 +10,7 @@ app = FastAPI()
 
 # Get the model URL from environment variable
 MODEL_URL = os.environ.get("MODEL_URL")
-model_path = "/tmp/yolov8s.pt"
+model_path = "/tmp/yolov8n.pt"
 
 # Download the model from Vercel Blob
 if MODEL_URL:
