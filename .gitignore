@@ -1,5 +1,33 @@
-# Logs
-logs
+# ============== #
+# Vercel         #
+# ============== #
+.vercel
+
+# ================== #
+# Operating System #
+# ================== #
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ================== #
+# IDE / Editors      #
+# ================== #
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ================== #
+# Dependency / Logs  #
+# ================== #
+/node_modules/
+/frontend/node_modules/
+/logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,29 +35,50 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# ================== #
+# Build Artifacts    #
+# ================== #
+/dist/
+/dist-ssr/
+/frontend/dist/
+/build/
+
+# ================== #
+# Python             #
+# ================== #
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ================== #
+# Local Secrets      #
+# ================== #
 *.local
+.env*
+!.env.example
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-.vercel
-
-# Data and preprocessing files
-data
-preprocess-YOLOV8
-
-.env*.local
-
-# Model files
+# ================== #
+# Project Specific   #
+# ================== #
+# Data and model files should not be committed.
+# The backend downloads the model from a URL at runtime.
+/data/
+/preprocess-YOLOV8/
 *.pt
