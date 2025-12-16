@@ -20,9 +20,6 @@ export default defineConfig(({ mode }) => {
       },
       build: {
         rollupOptions: {
-          manualChunks: {
-            'react-query': ['@tanstack/react-query'],
-          },
         },
       },
     };
