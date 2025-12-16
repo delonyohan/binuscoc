@@ -57,6 +57,22 @@ The project is organized into two main parts in a monorepo structure:
 -   `./backend`: Contains the Python/FastAPI serverless functions for the API.
 -   `./preprocess-YOLOV8`: Contains scripts and data related to the YOLOv8 model preprocessing.
 
+## Deployment
+
+### Vercel
+
+This project is configured for seamless deployment to [Vercel](https://vercel.com/).
+
+#### Model Hosting
+
+Due to the large size of the machine learning model (`best.pt`), it cannot be stored in the Git repository. Before deploying, you must:
+
+1.  **Upload the Model**: Upload your trained model (e.g., `best.pt` located in `preprocess-YOLOV8/runs/detect/train/weights/`) to a file hosting service. Recommended options are [Vercel Blob](https://vercel.com/docs/storage/vercel-blob), AWS S3, or Google Cloud Storage.
+2.  **Get a Public URL**: Ensure the uploaded file has a publicly accessible, direct download URL.
+3.  **Set Environment Variable**: In your Vercel project settings, create a new Environment Variable named `MODEL_URL` and set its value to the direct download URL from the previous step.
+
+The backend server is configured to automatically download this model into the runtime environment when the application starts. Without this environment variable, the live prediction feature will not work.
+
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
