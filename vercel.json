@@ -7,10 +7,7 @@
     },
     {
       "src": "backend/api/main.py",
-      "use": "@vercel/python",
-      "config": {
-        "build": "pip install -r requirements.txt && echo '--- Installed Packages ---' && pip list && echo '--- Site-Packages Details ---' && ls -laR $(python -c 'import site; print(site.getsitepackages()[0])')"
-      }
+      "use": "@vercel/python"
     }
   ]
 }

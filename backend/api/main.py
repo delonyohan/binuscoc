@@ -1,3 +1,33 @@
+import os
+import site
+import sys
+
+# --- Deployment Size Debugging ---
+# This code will run when Vercel builds the function.
+# It inspects the installed packages to find what is taking up space.
+print("--- Vercel Deployment Debugger: Inspecting Python Environment ---", file=sys.stderr)
+total_size = 0
+try:
+    site_packages_paths = site.getsitepackages()
+    print(f"Site packages paths: {site_packages_paths}", file=sys.stderr)
+    for site_packages_path in site_packages_paths:
+        print(f"Walking site-packages at: {site_packages_path}", file=sys.stderr)
+        for root, dirs, files in os.walk(site_packages_path):
+            for name in files:
+                path = os.path.join(root, name)
+                try:
+                    size = os.path.getsize(path)
+                    total_size += size
+                    if size > 10 * 1024 * 1024: # if file > 10MB
+                        print(f"--> LARGE FILE: {path}, Size: {size / 1024 / 1024:.2f} MB", file=sys.stderr)
+                except OSError:
+                    pass
+    print(f"--- TOTAL SITE-PACKAGES SIZE: {total_size / 1024 / 1024:.2f} MB ---", file=sys.stderr)
+except Exception as e:
+    print(f"--- Error during debug walk: {e} ---", file=sys.stderr)
+# --- End Debugging ---
+
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import cv2
@@ -6,7 +36,6 @@ from ultralytics import YOLO
 import base64
 import re
 import uuid
-import os
 import requests
 
 app = FastAPI()
@@ -33,30 +62,32 @@ class PredictionResponse(BaseModel):
 
 # --- Model Loading ---
 MODEL_PATH = "/tmp/best.pt"
+model = None
 
-# Download the model from the URL specified in the environment variable
-MODEL_URL = os.environ.get("MODEL_URL")
-if MODEL_URL and not os.path.exists(MODEL_PATH):
-    print(f"Downloading model from {MODEL_URL}...")
-    try:
-        response = requests.get(MODEL_URL, stream=True)
-        response.raise_for_status()
-        with open(MODEL_PATH, "wb") as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
-        print("Model downloaded successfully.")
-    except Exception as e:
-        print(f"FATAL: Failed to download model. Error: {e}")
-        # If the model fails to download, the app can't start.
-        # This will cause a runtime error on Vercel, which is appropriate.
+# This block runs once when the serverless function is initialized
+if model is None:
+    MODEL_URL = os.environ.get("MODEL_URL")
+    if MODEL_URL and not os.path.exists(MODEL_PATH):
+        print(f"Downloading model from {MODEL_URL}...")
+        try:
+            response = requests.get(MODEL_URL, stream=True)
+            response.raise_for_status()
+            with open(MODEL_PATH, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            print("Model downloaded successfully.")
+        except Exception as e:
+            print(f"FATAL: Failed to download model. Error: {e}")
 
-# Load the YOLOv8 model, but handle the case where it doesn't exist
-try:
-    model = YOLO(MODEL_PATH)
-    print("YOLOv8 model loaded successfully.")
-except Exception as e:
-    model = None
-    print(f"FATAL: Model could not be loaded from {MODEL_PATH}. Error: {e}")
+    # Load the YOLOv8 model, but handle the case where it doesn't exist
+    if os.path.exists(MODEL_PATH):
+        try:
+            model = YOLO(MODEL_PATH)
+            print("YOLOv8 model loaded successfully.")
+        except Exception as e:
+            print(f"FATAL: Model could not be loaded from {MODEL_PATH}. Error: {e}")
+    else:
+        print("FATAL: Model file not found and could not be downloaded.")
 
 
 # --- API Endpoints ---
@@ -71,7 +102,7 @@ async def predict(payload: ImagePayload):
     and returns detected violations.
     """
     if not model:
-        raise HTTPException(status_code=500, detail="Model is not loaded. Check server logs for errors.")
+        raise HTTPException(status_code=503, detail="Model is not loaded or failed to load. Check server logs.")
 
     # Decode the base64 image
     try:
