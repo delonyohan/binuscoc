@@ -9,7 +9,7 @@
       "src": "backend/api/main.py",
       "use": "@vercel/python",
       "config": {
-        "build": "pip install -r requirements.txt && python -c \"import ultralytics; import os; from pathlib import Path; p = Path(ultralytics.__file__).parent; print('Cleaning up ultralytics package...'); [f.unlink() for f in p.glob('*.pt') if f.is_file()]; print('Cleanup complete.')\""
+        "build": "pip install -r requirements.txt && echo '--- Installed Packages ---' && pip list && echo '--- Site-Packages Details ---' && ls -laR $(python -c 'import site; print(site.getsitepackages()[0])')"
       }
     }
   ]
