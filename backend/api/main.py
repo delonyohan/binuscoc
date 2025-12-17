@@ -1,3 +1,4 @@
+import time
 import os
 import site
 import sys
@@ -61,7 +62,7 @@ class PredictionResponse(BaseModel):
     detections: list[Detection]
 
 # --- Model Loading ---
-MODEL_PATH = "/tmp/best.pt"
+MODEL_PATH = "/tmp/yolov8s.pt"
 model = None
 
 # This block runs once when the serverless function is initialized
