@@ -7,10 +7,6 @@
       "config": {
         "distDir": "dist"
       }
-    },
-    {
-      "src": "backend/api/main.py",
-      "use": "@vercel/python"
     }
   ],
   "cleanUrls": true,
