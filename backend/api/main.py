@@ -31,9 +31,9 @@ except Exception as e:
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-# import cv2 # Commented out for now
-# import numpy as np # Commented out for now
-# from ultralytics import YOLO # Commented out for now
+import cv2
+import numpy as np
+from ultralytics import YOLO
 import base64
 import re
 import uuid
@@ -62,33 +62,33 @@ class PredictionResponse(BaseModel):
     detections: list[Detection]
 
 # --- Model Loading ---
-# MODEL_PATH = "/tmp/yolov8s.pt" # Commented out
-model = None # Model loading disabled
+MODEL_PATH = "/tmp/yolov8s.pt"
+model = None
 
 # This block runs once when the serverless function is initialized
-# if model is None: # Commented out
-#     MODEL_URL = os.environ.get("MODEL_URL") # Commented out
-#     if MODEL_URL and not os.path.exists(MODEL_PATH): # Commented out
-#         print(f"Downloading model from {MODEL_URL}...") # Commented out
-#         try: # Commented out
-#             response = requests.get(MODEL_URL, stream=True) # Commented out
-#             response.raise_for_status() # Commented out
-#             with open(MODEL_PATH, "wb") as f: # Commented out
-#                 for chunk in response.iter_content(chunk_size=8192): # Commented out
-#                     f.write(chunk) # Commented out
-#             print("Model downloaded successfully.") # Commented out
-#         except Exception as e: # Commented out
-#             print(f"FATAL: Failed to download model. Error: {e}") # Commented out
+if model is None:
+    MODEL_URL = os.environ.get("MODEL_URL")
+    if MODEL_URL and not os.path.exists(MODEL_PATH):
+        print(f"Downloading model from {MODEL_URL}...")
+        try:
+            response = requests.get(MODEL_URL, stream=True)
+            response.raise_for_status()
+            with open(MODEL_PATH, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            print("Model downloaded successfully.")
+        except Exception as e:
+            print(f"FATAL: Failed to download model. Error: {e}")
 
-#     # Load the YOLOv8 model, but handle the case where it doesn't exist
-#     if os.path.exists(MODEL_PATH): # Commented out
-#         try: # Commented out
-#             model = YOLO(MODEL_PATH) # Commented out
-#             print("YOLOv8 model loaded successfully.") # Commented out
-#         except Exception as e: # Commented out
-#             print(f"FATAL: Model could not be loaded from {MODEL_PATH}. Error: {e}") # Commented out
-#     else: # Commented out
-#         print("FATAL: Model file not found and could not be downloaded.") # Commented out
+    # Load the YOLOv8 model, but handle the case where it doesn't exist
+    if os.path.exists(MODEL_PATH):
+        try:
+            model = YOLO(MODEL_PATH)
+            print("YOLOv8 model loaded successfully.")
+        except Exception as e:
+            print(f"FATAL: Model could not be loaded from {MODEL_PATH}. Error: {e}")
+    else:
+        print("FATAL: Model file not found and could not be downloaded.")
 
 
 # --- API Endpoints ---
@@ -102,4 +102,41 @@ async def predict(payload: ImagePayload):
     Accepts a base64 encoded image, runs YOLOv8 inference,
     and returns detected violations.
     """
-    raise HTTPException(status_code=501, detail="Model inference is temporarily disabled for deployment testing.")
+    if not model:
+        raise HTTPException(status_code=503, detail="Model is not loaded or failed to load. Check server logs.")
+
+    # Decode the base64 image
+    try:
+        image_data = re.sub('^data:image/.+;base64,', '', payload.image)
+        image_bytes = base64.b64decode(image_data)
+        nparr = np.frombuffer(image_bytes, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid image data")
+
+    if img is None:
+        raise HTTPException(status_code=400, detail="Could not decode image")
+
+    # Perform inference
+    results = model(img)
+
+    # Extract and format detections
+    detections = []
+    for result in results:
+        for box in result.boxes:
+            x1, y1, x2, y2 = box.xyxy[0]
+            class_id = int(box.cls[0])
+            detections.append(Detection(
+                id=str(uuid.uuid4()),
+                timestamp=int(time.time() * 1000),
+                type=model.names[class_id],
+                confidence=float(box.conf[0]),
+                boundingBox=BoundingBox(
+                    x=int(x1),
+                    y=int(y1),
+                    width=int(x2 - x1),
+                    height=int(y2 - y1)
+                )
+            ))
+    
+    return {"detections": detections}
