@@ -68,7 +68,7 @@ export const LiveMonitor: React.FC = () => {
                     ctx.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
                     const imageData = captureCanvas.toDataURL('image/jpeg', 0.8);
                     
-                    const response = await fetch('/api/predict', {
+                    const response = await fetch(`${import.meta.env.VITE_BACKEND_API_URL}/api/predict`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ image: imageData }),
