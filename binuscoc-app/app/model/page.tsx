@@ -1,8 +1,8 @@
 "use client";
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import StaticImageDetector from '@/components/StaticImageDetector';
 
-// Mock Training Data (Epochs)
 const trainingData = Array.from({ length: 50 }, (_, i) => ({
   epoch: i + 1,
   box_loss: 0.1 - (i * 0.0015) + (Math.random() * 0.005),
@@ -23,28 +23,11 @@ export default function ModelManager() {
         </p>
       </div>
 
-      {/* KPI Cards - High Contrast */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-gray-900 p-5 rounded-lg shadow-md border border-gray-100 dark:border-gray-800">
-          <p className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Precision</p>
-          <p className="text-3xl font-extrabold text-blue-600">0.892</p>
-        </div>
-        <div className="bg-white dark:bg-gray-900 p-5 rounded-lg shadow-md border border-gray-100 dark:border-gray-800">
-          <p className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Recall</p>
-          <p className="text-3xl font-extrabold text-green-600">0.854</p>
-        </div>
-        <div className="bg-white dark:bg-gray-900 p-5 rounded-lg shadow-md border border-gray-100 dark:border-gray-800">
-          <p className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">mAP@0.5</p>
-          <p className="text-3xl font-extrabold text-purple-600">0.881</p>
-        </div>
-        <div className="bg-white dark:bg-gray-900 p-5 rounded-lg shadow-md border border-gray-100 dark:border-gray-800">
-          <p className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">mAP@0.5:0.95</p>
-          <p className="text-3xl font-extrabold text-orange-600">0.653</p>
-        </div>
-      </div>
-
-      {/* Performance Curves */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="lg:col-span-2">
+            <StaticImageDetector />
+        </div>
+
         <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 border-b pb-4">Training Loss Metrics</h3>
           <div className="h-72">
@@ -91,10 +74,8 @@ export default function ModelManager() {
             </ResponsiveContainer>
           </div>
         </div>
-      </div>
-
-       {/* Confusion Matrix Visualization (Heatmap Style - Refined) */}
-       <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
+        
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md lg:col-span-2">
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 border-b pb-4">Class Confusion Matrix</h3>
           <div className="overflow-x-auto">
              <table className="w-full text-center text-sm border-collapse">
@@ -105,6 +86,7 @@ export default function ModelManager() {
                          <th className="p-3 border dark:border-gray-700">Shorts</th>
                          <th className="p-3 border dark:border-gray-700">Skirt</th>
                          <th className="p-3 border dark:border-gray-700">Jeans</th>
+                         <th className="p-3 border dark:border-gray-700">Footwear</th>
                          <th className="p-3 border dark:border-gray-700">Background</th>
                      </tr>
                  </thead>
@@ -112,26 +94,29 @@ export default function ModelManager() {
                      <tr>
                          <td className="font-bold p-3 border dark:border-gray-700 bg-gray-50 dark:bg-gray-800">Crop Top</td>
                          <td className="bg-blue-600 text-white font-bold p-3 border dark:border-gray-700">0.92</td>
-                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.01</td>
-                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.00</td>
-                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.02</td>
-                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.05</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">0.01</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">0.00</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">0.02</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">0.00</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">0.05</td>
                      </tr>
                      <tr>
                          <td className="font-bold p-3 border dark:border-gray-700 bg-gray-50 dark:bg-gray-800">Shorts</td>
-                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.01</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">0.01</td>
                          <td className="bg-blue-600 text-white font-bold p-3 border dark:border-gray-700">0.88</td>
-                         <td className="bg-blue-100 dark:bg-blue-900 p-3 border dark:border-gray-700">0.08</td>
-                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.00</td>
-                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.03</td>
+                         <td className="bg-blue-100 dark:bg-blue-900/30 p-3 border dark:border-gray-700">0.08</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">0.00</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">0.00</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">0.03</td>
                      </tr>
                      <tr>
                          <td className="font-bold p-3 border dark:border-gray-700 bg-gray-50 dark:bg-gray-800">Skirt</td>
-                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.00</td>
-                         <td className="bg-blue-100 dark:bg-blue-900 p-3 border dark:border-gray-700">0.12</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">0.00</td>
+                         <td className="bg-blue-100 dark:bg-blue-900/30 p-3 border dark:border-gray-700">0.12</td>
                          <td className="bg-blue-600 text-white font-bold p-3 border dark:border-gray-700">0.85</td>
-                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.00</td>
-                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.03</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">0.00</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">0.00</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">0.03</td>
                      </tr>
                  </tbody>
              </table>
@@ -139,6 +124,7 @@ export default function ModelManager() {
           </div>
        </div>
 
+      </div>
     </div>
   );
 }
