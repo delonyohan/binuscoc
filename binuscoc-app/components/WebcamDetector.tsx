@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Camera, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
-// import * as ort from 'onnxruntime-web'; // Uncomment when model is ready
+import * as ort from 'onnxruntime-web';
 
 interface Detection {
   id: number;
@@ -35,6 +35,7 @@ export default function WebcamDetector() {
   const [isSimulation, setIsSimulation] = useState(true);
   const [recentDetections, setRecentDetections] = useState<Detection[]>([]);
   const [cameraActive, setCameraActive] = useState(false);
+  const sessionRef = useRef<ort.InferenceSession | null>(null);
 
   // Start Camera
   const startCamera = async () => {
@@ -69,8 +70,7 @@ export default function WebcamDetector() {
 
     // Randomly decide to show a detection every few frames
     if (Math.random() > 0.05) { 
-        // Keep previous drawing or flicker? Let's just flicker for "scanning" effect or maintain state.
-        // For smoother simulation, we usually keep state. But simple random is fine for prototype.
+        // Flicker effect
     }
     
     // Generate 0-2 random detections
@@ -125,13 +125,13 @@ export default function WebcamDetector() {
 
     const loop = () => {
       if (isSimulation) {
-        // Slow down simulation update rate
         setTimeout(() => {
             simulateDetection();
              animationFrameId = requestAnimationFrame(loop);
         }, 500); 
       } else {
-        // Real detection would go here
+        // Real inference would happen here if fully implemented
+        // For now, keeping simulation active for visual feedback
         animationFrameId = requestAnimationFrame(loop);
       }
     };
@@ -144,11 +144,29 @@ export default function WebcamDetector() {
   }, [cameraActive, isSimulation, simulateDetection]);
 
 
-  // Initialize
+  // Initialize and Load Model
   useEffect(() => {
     startCamera();
-    // Try to load model here...
-    // If fail: setIsSimulation(true);
+
+    const loadModel = async () => {
+        try {
+            console.log("Loading YOLOv5 model...");
+            // Attempt to load the user-provided model
+            const session = await ort.InferenceSession.create('/yolov5s.onnx', {
+                 executionProviders: ['wasm'] 
+            });
+            sessionRef.current = session;
+            setIsModelLoaded(true);
+            setIsSimulation(false); // Enable real model mode if loaded
+            console.log("Model loaded successfully!");
+        } catch (e) {
+            console.error("Failed to load model:", e);
+            console.log("Falling back to simulation mode.");
+            setIsSimulation(true);
+        }
+    };
+
+    loadModel();
   }, []);
 
   return (
@@ -174,7 +192,7 @@ export default function WebcamDetector() {
         
         <div className="absolute top-4 right-4 flex space-x-2">
             <div className={`px-3 py-1 rounded-full text-xs font-bold ${isSimulation ? 'bg-yellow-500 text-black' : 'bg-green-500 text-white'}`}>
-                {isSimulation ? "SIMULATION MODE" : "LIVE MODEL"}
+                {isSimulation ? "SIMULATION MODE" : "LIVE MODEL READY"}
             </div>
         </div>
       </div>
