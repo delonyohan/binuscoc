@@ -1,6 +1,6 @@
 "use client";
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 // Mock Training Data (Epochs)
 const trainingData = Array.from({ length: 50 }, (_, i) => ({
@@ -14,116 +14,128 @@ const trainingData = Array.from({ length: 50 }, (_, i) => ({
 
 export default function ModelManager() {
   return (
-    <div className="space-y-6 px-4">
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Model Manager</h1>
-        <p className="text-gray-600 dark:text-gray-300">
-          Analysis of the YOLOv5s Deep Learning model performance on the clothing dataset.
-          Metrics generated from training validation steps.
+    <div className="space-y-8 px-4 pb-10">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6 border-l-4 border-green-600">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">Model Analytics</h1>
+        <p className="text-gray-600 dark:text-gray-300 text-lg">
+          Detailed performance metrics for the YOLOv5s architecture.
+          Visualizing training loss, precision-recall, and class accuracy.
         </p>
       </div>
 
-      {/* KPI Cards */}
+      {/* KPI Cards - High Contrast */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow">
-          <p className="text-sm text-gray-500">Precision</p>
-          <p className="text-2xl font-bold text-blue-600">0.892</p>
+        <div className="bg-white dark:bg-gray-900 p-5 rounded-lg shadow-md border border-gray-100 dark:border-gray-800">
+          <p className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Precision</p>
+          <p className="text-3xl font-extrabold text-blue-600">0.892</p>
         </div>
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow">
-          <p className="text-sm text-gray-500">Recall</p>
-          <p className="text-2xl font-bold text-green-600">0.854</p>
+        <div className="bg-white dark:bg-gray-900 p-5 rounded-lg shadow-md border border-gray-100 dark:border-gray-800">
+          <p className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Recall</p>
+          <p className="text-3xl font-extrabold text-green-600">0.854</p>
         </div>
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow">
-          <p className="text-sm text-gray-500">mAP@0.5</p>
-          <p className="text-2xl font-bold text-purple-600">0.881</p>
+        <div className="bg-white dark:bg-gray-900 p-5 rounded-lg shadow-md border border-gray-100 dark:border-gray-800">
+          <p className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">mAP@0.5</p>
+          <p className="text-3xl font-extrabold text-purple-600">0.881</p>
         </div>
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow">
-          <p className="text-sm text-gray-500">mAP@0.5:0.95</p>
-          <p className="text-2xl font-bold text-orange-600">0.653</p>
+        <div className="bg-white dark:bg-gray-900 p-5 rounded-lg shadow-md border border-gray-100 dark:border-gray-800">
+          <p className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">mAP@0.5:0.95</p>
+          <p className="text-3xl font-extrabold text-orange-600">0.653</p>
         </div>
       </div>
 
       {/* Performance Curves */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-4">Loss Metrics (Training)</h3>
-          <div className="h-64">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 border-b pb-4">Training Loss Metrics</h3>
+          <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trainingData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="epoch" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="box_loss" stroke="#ef4444" name="Box Loss" dot={false} />
-                <Line type="monotone" dataKey="obj_loss" stroke="#3b82f6" name="Obj Loss" dot={false} />
-                <Line type="monotone" dataKey="cls_loss" stroke="#22c55e" name="Cls Loss" dot={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis 
+                    dataKey="epoch" 
+                    tick={{fill: '#6b7280'}} 
+                    label={{ value: 'Epochs', position: 'insideBottomRight', offset: -5, fill: '#9ca3af' }}
+                />
+                <YAxis tick={{fill: '#6b7280'}} />
+                <Tooltip 
+                    contentStyle={{backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: '8px', border: '1px solid #e5e7eb'}}
+                />
+                <Legend wrapperStyle={{paddingTop: '10px'}} />
+                <Line type="monotone" dataKey="box_loss" stroke="#ef4444" name="Box Loss" dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="obj_loss" stroke="#3b82f6" name="Obj Loss" dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="cls_loss" stroke="#22c55e" name="Cls Loss" dot={false} strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-4">Precision & Recall (mAP)</h3>
-          <div className="h-64">
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 border-b pb-4">Precision & Recall (mAP)</h3>
+          <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trainingData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="epoch" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="mAP_50" stroke="#8b5cf6" name="mAP@0.5" dot={false} />
-                <Line type="monotone" dataKey="mAP_50_95" stroke="#f97316" name="mAP@0.5:0.95" dot={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis 
+                    dataKey="epoch" 
+                    tick={{fill: '#6b7280'}}
+                    label={{ value: 'Epochs', position: 'insideBottomRight', offset: -5, fill: '#9ca3af' }} 
+                />
+                <YAxis tick={{fill: '#6b7280'}} />
+                <Tooltip 
+                    contentStyle={{backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: '8px', border: '1px solid #e5e7eb'}}
+                />
+                <Legend wrapperStyle={{paddingTop: '10px'}} />
+                <Line type="monotone" dataKey="mAP_50" stroke="#8b5cf6" name="mAP@0.5" dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="mAP_50_95" stroke="#f97316" name="mAP@0.5:0.95" dot={false} strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-       {/* Confusion Matrix Visualization (Heatmap Style - Simplified) */}
-       <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-4">Class Confusion Matrix</h3>
+       {/* Confusion Matrix Visualization (Heatmap Style - Refined) */}
+       <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 border-b pb-4">Class Confusion Matrix</h3>
           <div className="overflow-x-auto">
-             <table className="min-w-full text-center text-xs">
+             <table className="w-full text-center text-sm border-collapse">
                  <thead>
-                     <tr>
-                         <th className="p-2">Actual \ Pred</th>
-                         <th className="p-2">Crop Top</th>
-                         <th className="p-2">Shorts</th>
-                         <th className="p-2">Skirt</th>
-                         <th className="p-2">Jeans</th>
-                         <th className="p-2">Bg</th>
+                     <tr className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                         <th className="p-3 border dark:border-gray-700">Actual \ Pred</th>
+                         <th className="p-3 border dark:border-gray-700">Crop Top</th>
+                         <th className="p-3 border dark:border-gray-700">Shorts</th>
+                         <th className="p-3 border dark:border-gray-700">Skirt</th>
+                         <th className="p-3 border dark:border-gray-700">Jeans</th>
+                         <th className="p-3 border dark:border-gray-700">Background</th>
                      </tr>
                  </thead>
-                 <tbody>
-                     <tr className="bg-blue-50">
-                         <td className="font-bold p-2">Crop Top</td>
-                         <td className="bg-blue-600 text-white p-2">0.92</td>
-                         <td className="p-2">0.01</td>
-                         <td className="p-2">0.00</td>
-                         <td className="p-2">0.02</td>
-                         <td className="p-2">0.05</td>
+                 <tbody className="text-gray-700 dark:text-gray-300">
+                     <tr>
+                         <td className="font-bold p-3 border dark:border-gray-700 bg-gray-50 dark:bg-gray-800">Crop Top</td>
+                         <td className="bg-blue-600 text-white font-bold p-3 border dark:border-gray-700">0.92</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.01</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.00</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.02</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.05</td>
                      </tr>
                      <tr>
-                         <td className="font-bold p-2">Shorts</td>
-                         <td className="p-2">0.01</td>
-                         <td className="bg-blue-600 text-white p-2">0.88</td>
-                         <td className="bg-blue-200 p-2">0.08</td>
-                         <td className="p-2">0.00</td>
-                         <td className="p-2">0.03</td>
+                         <td className="font-bold p-3 border dark:border-gray-700 bg-gray-50 dark:bg-gray-800">Shorts</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.01</td>
+                         <td className="bg-blue-600 text-white font-bold p-3 border dark:border-gray-700">0.88</td>
+                         <td className="bg-blue-100 dark:bg-blue-900 p-3 border dark:border-gray-700">0.08</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.00</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.03</td>
                      </tr>
-                     <tr className="bg-blue-50">
-                         <td className="font-bold p-2">Skirt</td>
-                         <td className="p-2">0.00</td>
-                         <td className="bg-blue-200 p-2">0.12</td>
-                         <td className="bg-blue-600 text-white p-2">0.85</td>
-                         <td className="p-2">0.00</td>
-                         <td className="p-2">0.03</td>
+                     <tr>
+                         <td className="font-bold p-3 border dark:border-gray-700 bg-gray-50 dark:bg-gray-800">Skirt</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.00</td>
+                         <td className="bg-blue-100 dark:bg-blue-900 p-3 border dark:border-gray-700">0.12</td>
+                         <td className="bg-blue-600 text-white font-bold p-3 border dark:border-gray-700">0.85</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.00</td>
+                         <td className="p-3 border dark:border-gray-700 hover:bg-gray-50">0.03</td>
                      </tr>
                  </tbody>
              </table>
-             <p className="text-xs text-gray-500 mt-2 text-center">* Simplified matrix for display</p>
+             <p className="text-xs text-gray-500 mt-3 text-center italic">* Rows represent Actual classes, Columns represent Predicted classes. High diagonal values indicate good performance.</p>
           </div>
        </div>
 

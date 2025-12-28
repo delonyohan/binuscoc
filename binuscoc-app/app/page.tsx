@@ -1,120 +1,170 @@
 "use client";
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { AlertTriangle, CheckCircle, Brain, Users } from "lucide-react";
-
-// Mock Data
-const weeklyData = [
-  { name: 'Mon', violations: 12, compliance: 150 },
-  { name: 'Tue', violations: 19, compliance: 230 },
-  { name: 'Wed', violations: 8, compliance: 180 },
-  { name: 'Thu', violations: 15, compliance: 210 },
-  { name: 'Fri', violations: 25, compliance: 190 },
-  { name: 'Sat', violations: 5, compliance: 80 },
-  { name: 'Sun', violations: 2, compliance: 40 },
-];
-
-const distributionData = [
-  { name: 'Crop Tops', value: 40, color: '#ef4444' }, // Red
-  { name: 'Shorts/Skirts', value: 35, color: '#f97316' }, // Orange
-  { name: 'Open Footwear', value: 25, color: '#eab308' }, // Yellow
-];
+import { useEffect, useState } from "react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { AlertTriangle, CheckCircle, Brain, Users, RotateCcw } from "lucide-react";
 
 export default function Dashboard() {
+  const [stats, setStats] = useState({
+    totalDetections: 0,
+    violationsToday: 0,
+    cropTop: 0,
+    shorts: 0,
+    openFoot: 0
+  });
+
+  useEffect(() => {
+    // Load data from localStorage
+    const saved = localStorage.getItem("binuscoc_stats");
+    if (saved) {
+        setStats(JSON.parse(saved));
+    }
+  }, []);
+
+  const resetData = () => {
+      const empty = { totalDetections: 0, violationsToday: 0, cropTop: 0, shorts: 0, openFoot: 0 };
+      setStats(empty);
+      localStorage.setItem("binuscoc_stats", JSON.stringify(empty));
+  }
+
+  // Transform stats for charts
+  const weeklyData = [
+    { name: 'Today', violations: stats.violationsToday, compliance: stats.totalDetections - stats.violationsToday },
+  ];
+
+  const distributionData = [
+    { name: 'Crop Tops', value: stats.cropTop, color: '#ef4444' }, 
+    { name: 'Shorts/Skirts', value: stats.shorts, color: '#f97316' }, 
+    { name: 'Open Footwear', value: stats.openFoot, color: '#eab308' }, 
+  ];
+
   return (
-    <div className="space-y-6 px-4">
+    <div className="space-y-6 px-4 pb-10">
       {/* Intro Section */}
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Welcome to BINUSCOC</h1>
-        <p className="text-gray-600 dark:text-gray-300">
-          The BINUS Campus Outfit Check system utilizes the <strong>YOLOv5s</strong> deep learning model to monitor 
-          and ensure compliance with Bina Nusantara University's dress code policy in real-time. 
-          This dashboard provides live insights into outfit detections and violation trends.
-        </p>
+      <div className="flex justify-between items-end">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6 border-l-4 border-blue-600 flex-1 mr-4">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">BINUSCOC Dashboard</h1>
+            <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed">
+              Real-time monitoring system for Bina Nusantara University dress code compliance. 
+              Powered by <strong>YOLOv5</strong>.
+            </p>
+          </div>
+          <button onClick={resetData} className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-md h-full hover:bg-gray-50 transition text-gray-500 hover:text-red-500" title="Reset Data">
+              <RotateCcw className="w-6 h-6"/>
+          </button>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow border-l-4 border-blue-500">
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-100 dark:border-gray-800">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Detections</p>
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white">1,284</h3>
+              <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Detections</p>
+              <h3 className="text-4xl font-extrabold text-gray-900 dark:text-white mt-2">{stats.totalDetections}</h3>
             </div>
-            <Users className="w-8 h-8 text-blue-500" />
+            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                <Users className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+            </div>
           </div>
-          <p className="text-xs text-green-600 mt-2 flex items-center">
-            <CheckCircle className="w-3 h-3 mr-1" /> +12% from last week
+          <p className="text-sm text-gray-500 mt-4 flex items-center">
+            <CheckCircle className="w-4 h-4 mr-1 text-green-500" /> System Active
           </p>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow border-l-4 border-red-500">
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-100 dark:border-gray-800">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Violations Today</p>
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white">14</h3>
+              <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Violations Today</p>
+              <h3 className="text-4xl font-extrabold text-gray-900 dark:text-white mt-2">{stats.violationsToday}</h3>
             </div>
-            <AlertTriangle className="w-8 h-8 text-red-500" />
+            <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
+                <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
+            </div>
           </div>
-          <p className="text-xs text-red-600 mt-2">Requires attention</p>
+          <p className="text-sm text-gray-500 mt-4">recorded from live monitor</p>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow border-l-4 border-purple-500">
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-100 dark:border-gray-800">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Model Version</p>
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white">YOLOv5s</h3>
+              <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Model Status</p>
+              <h3 className="text-4xl font-extrabold text-gray-900 dark:text-white mt-2">v5s</h3>
             </div>
-            <Brain className="w-8 h-8 text-purple-500" />
+            <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full">
+                <Brain className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+            </div>
           </div>
-          <p className="text-xs text-gray-500 mt-2">Last updated: v1.0.0</p>
+          <p className="text-sm text-gray-500 mt-4">ONNX Runtime Web</p>
         </div>
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Weekly Trend */}
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Weekly Violation Trends</h3>
-          <div className="h-80">
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Live Activity</h3>
+          <div className="h-[350px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={weeklyData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="violations" stroke="#ef4444" name="Violations" strokeWidth={2} />
-                <Line type="monotone" dataKey="compliance" stroke="#22c55e" name="Compliant" strokeWidth={2} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                <XAxis dataKey="name" tick={{fill: '#6b7280'}} axisLine={false} tickLine={false} dy={10} />
+                <YAxis tick={{fill: '#6b7280'}} axisLine={false} tickLine={false} />
+                <Tooltip 
+                    contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}} 
+                />
+                <Legend wrapperStyle={{paddingTop: '20px'}}/>
+                <Line 
+                    type="monotone" 
+                    dataKey="violations" 
+                    stroke="#ef4444" 
+                    name="Violations" 
+                    strokeWidth={3} 
+                    dot={{r: 4, fill: '#ef4444', strokeWidth: 2, stroke: '#fff'}}
+                    activeDot={{r: 6}}
+                />
+                <Line 
+                    type="monotone" 
+                    dataKey="compliance" 
+                    stroke="#22c55e" 
+                    name="Compliant" 
+                    strokeWidth={3} 
+                    dot={{r: 4, fill: '#22c55e', strokeWidth: 2, stroke: '#fff'}}
+                    activeDot={{r: 6}}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Distribution */}
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Violation Distribution</h3>
-          <div className="h-80 flex justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={distributionData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {distributionData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend verticalAlign="bottom" height={36}/>
-              </PieChart>
-            </ResponsiveContainer>
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Violation Categories</h3>
+          <div className="h-[350px] w-full flex flex-col items-center justify-center">
+            {stats.violationsToday === 0 ? (
+                <div className="text-gray-400 text-sm font-medium">No violations to display</div>
+            ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                    <Pie
+                    data={distributionData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }: any) => percent > 0 ? `${name}` : ''}
+                    outerRadius={120}
+                    innerRadius={60}
+                    paddingAngle={5}
+                    dataKey="value"
+                    >
+                    {distributionData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend verticalAlign="bottom" height={36}/>
+                </PieChart>
+                </ResponsiveContainer>
+            )}
           </div>
         </div>
       </div>

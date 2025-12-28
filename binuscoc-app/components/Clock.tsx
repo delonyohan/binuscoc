@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { Clock as ClockIcon } from "lucide-react";
 
 export default function Clock() {
-  const [time, setTime] = useState(new Date());
+  const [time, setTime] = useState<Date | null>(null);
 
   useEffect(() => {
+    setTime(new Date());
     const timer = setInterval(() => {
       setTime(new Date());
     }, 1000);
@@ -29,6 +30,16 @@ export default function Clock() {
       second: "2-digit",
     });
   };
+
+  if (!time) {
+      return (
+        <div className="flex items-center space-x-2 text-sm font-medium text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-md shadow-sm opacity-50">
+            <ClockIcon className="w-4 h-4" />
+            <span className="hidden md:inline">Loading...</span>
+            <span className="w-[80px] text-center">--:--:--</span>
+        </div>
+      );
+  }
 
   return (
     <div className="flex items-center space-x-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-md shadow-sm">
